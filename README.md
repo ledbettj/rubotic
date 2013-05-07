@@ -1,29 +1,27 @@
 # Rubotic
 
-TODO: Write a gem description
-
-## Installation
-
-Add this line to your application's Gemfile:
-
-    gem 'rubotic'
-
-And then execute:
-
-    $ bundle
-
-Or install it yourself as:
-
-    $ gem install rubotic
+Extendable IRC Bot written in Ruby.
 
 ## Usage
 
-TODO: Write usage instructions here
+    bundle exec pry
+    require 'rubotic'
+    b = Rubotic::Bot.new
 
-## Contributing
+    b.configure do
+      nick   'guest-user-12'
+      server 'irc.freenode.org'
+      port   6667
+      no_ssl
+    end
 
-1. Fork it
-2. Create your feature branch (`git checkout -b my-new-feature`)
-3. Commit your changes (`git commit -am 'Add some feature'`)
-4. Push to the branch (`git push origin my-new-feature`)
-5. Create new Pull Request
+    b.run
+
+Congratulations! You now have an IRC bot that does nothing but respond to pings
+and print out sent/received events.  You should probably extend it to do more
+via Plugins.
+
+## Plugins
+
+    Er, they don't exist yet.  Check back later.
+
