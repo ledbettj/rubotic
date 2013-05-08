@@ -19,14 +19,16 @@ class Rubotic::Config
     end
   end
 
-  define_setters :server, :port, :password, :nick
+  define_setters :server, :port, :password, :nick, :name, :channel
   define_boolean_setters [:ssl, :no_ssl]
 
   DEFAULTS = {
-    ssl:    false,
-    server: 'irc.freenode.org',
-    port:   6667,
-    nick:   "guest#{Random.new.rand(1000)}"
+    ssl:     false,
+    server:  'irc.freenode.org',
+    port:    6667,
+    nick:    "guest#{Random.new.rand(1000)}",
+    name:    'Rubotic User',
+    channel: '#rubotic'
   }
 
   def initialize(opts = {})

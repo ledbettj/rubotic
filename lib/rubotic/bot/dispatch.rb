@@ -1,22 +1,32 @@
 class Rubotic::Bot::Dispatch
   def initialize(&blk)
-    @handlers = {}
+    @handlers  = {}
+    @unhandled = []
     self.instance_eval(&blk)
   end
 
   def on(cmd, &blk)
-    @handlers[cmd] = blk
+    @handlers[cmd] ||= []
+    @handlers[cmd] << blk
   end
 
   def off(cmd)
     @handlers.delete(cmd)
   end
 
+  def unhandled(&blk)
+    @unhandled << blk
+  end
+
   def dispatch(cmd, *args)
-    if @handlers[cmd]
-      @handlers[cmd].call(*args)
-    else
-      false
-    end
+    callbacks = if @handlers[cmd]
+                  @handlers[cmd]
+                elsif @unhandled.any?
+                  @unhandled
+                else
+                  []
+                end
+
+    callbacks.flat_map{ |cb| cb.call(*args) }.select{ |r| r.is_a?(Rubotic::Bot::IRCMessage) }
   end
 end

@@ -9,8 +9,10 @@ class Rubotic::Bot::IRCMessage
 
     @trailing = opts[:trailing] || false
     @from     = opts[:from]     || nil
-    @command  = command.downcase.to_sym
+    @command  = command.is_a?(Symbol) ? command : command.downcase.to_sym
     @args     = args
+
+    @from = Rubotic::Bot::Nick.parse(@from) unless @from.nil?
   end
 
   def to_s

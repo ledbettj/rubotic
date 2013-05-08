@@ -1,3 +1,5 @@
+require 'etc'
+
 class Rubotic::Bot
 
   attr_reader :config
@@ -8,14 +10,25 @@ class Rubotic::Bot
     @queue      = MessageQueue.new
     @dispatch   = Dispatch.new do
       on :ping do |bot, msg|
-        IRCMessage.new("PONG", msg.args.first)
+        puts "Ping? Pong!"
+        IRCMessage.new(:pong, msg.args.first)
+      end
+      on :privmsg do |bot, msg|
+        puts "Privmsg: #{msg}"
       end
 
+      unhandled do |bot, msg|
+        puts "Unhandled: #{msg}"
+      end
     end
   end
 
   def configure(&blk)
     @config.configure(&blk)
+  end
+
+  def events(&blk)
+    @dispatch.instance_eval(&blk)
   end
 
   def run
@@ -24,7 +37,6 @@ class Rubotic::Bot
     while @connection.connected?
       @connection.read_messages.each{ |msg| dispatch(msg) }
       if !(outbound = @queue.pop).nil?
-        puts "OUT>\t#{outbound}"
         @connection.write(outbound)
       end
     end
@@ -34,9 +46,8 @@ class Rubotic::Bot
   private
 
   def dispatch(msg)
-    puts "IN>\t#{msg}"
-    r = @dispatch.dispatch(msg.command, self, msg)
-    @queue.enqueue(r) if r && r.is_a?(IRCMessage)
+    responses = @dispatch.dispatch(msg.command, self, msg)
+    @queue.enqueue(*responses) if responses && responses.any?
   end
 
   def connect
@@ -49,14 +60,18 @@ class Rubotic::Bot
 
   def login
     @queue.enqueue(
-      IRCMessage.new("PASS", @config.password)
+      IRCMessage.new(:pass, @config.password)
     ) unless @config.password.nil?
 
-    @queue.enqueue(IRCMessage.new("NICK", @config.nick))
+    @queue.enqueue(IRCMessage.new(:nick, @config.nick))
 
-    @queue.enqueue(IRCMessage.new(
-        "USER", @config.nick, "localhost", "localdomain",
-        "Guest User", trailing: true
-    ))
+    host, domain = Socket.gethostbyname(Socket.gethostname).first.split('.', 2)
+    host   ||= 'localhost'
+    domain ||= 'localdomain'
+
+    @queue.enqueue(IRCMessage.new(:user, Etc.getlogin, host, domain,
+        @config.name, trailing: true))
+
+    @queue.enqueue(IRCMessage.new(:join, @config.channel))
   end
 end
