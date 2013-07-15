@@ -1,0 +1,13 @@
+#!/usr/bin/env ruby
+
+require 'rubotic'
+
+b = Rubotic::Bot.new
+
+b.configure do
+  server 'irc.freenode.org'
+  port   6667
+  nick   'rubotic'
+end
+
+b.run
