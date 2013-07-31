@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 
 require 'rubotic'
+require 'commands'
 
 b = Rubotic::Bot.new
 

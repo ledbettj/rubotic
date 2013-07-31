@@ -3,8 +3,18 @@ require 'etc'
 class Rubotic::Bot
 
   attr_reader :config
+  attr_reader :event_history
+  attr_reader :commands
+
+  MAX_HISTORY = 100
 
   def initialize
+    @commands   = Rubotic::Command.registered.map do |cmd|
+      cmd.send(:new, self)
+    end
+
+    @event_history = []
+
     @config     = Rubotic::Config.new
     @connection = Connection.new
     @queue      = MessageQueue.new
@@ -38,15 +48,46 @@ class Rubotic::Bot
       @connection.read_messages.each{ |msg| dispatch(msg) }
       if !(outbound = @queue.pop).nil?
         @connection.write(outbound)
+        outbound.from = Rubotic::Bot::Nick.parse(@config.nick)
+        log_history(outbound)
       end
     end
     disconnect
   end
 
+
   private
 
+  def log_history(*events)
+    events.each{ |event| @event_history.push(event) }
+    @event_history.shift while @event_history.size > MAX_HISTORY
+  end
+
+  def dispatch_command(msg)
+    rc  = []
+    cmd = @commands.find{ |c| msg.args.last.start_with?(c.class.trigger) }
+    if cmd
+      args = Shellwords.shellwords(msg.args.last[cmd.class.trigger.length..-1])
+
+      if args.length != cmd.class.arguments.length
+        rc = Rubotic::Bot::IRCMessage.new(:privmsg,
+          msg.from,
+          "usage: #{cmd.class.usage}",
+          trailing: true
+        )
+      else
+        rc = cmd.invoke(*args, msg)
+      end
+    end
+    Array(rc).flat_map.select{ |r| r.is_a?(Rubotic::Bot::IRCMessage) }
+  end
+
   def dispatch(msg)
+    log_history(msg)
     responses = @dispatch.dispatch(msg.command, self, msg)
+    @queue.enqueue(*responses) if responses && responses.any?
+
+    responses = dispatch_command(msg) if msg.command == :privmsg
     @queue.enqueue(*responses) if responses && responses.any?
   end
 
