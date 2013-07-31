@@ -19,7 +19,7 @@ class Rubotic::Config
     end
   end
 
-  define_setters :server, :port, :password, :nick, :name, :channel
+  define_setters :server, :port, :password, :nick, :name, :channel, :login
   define_boolean_setters [:ssl, :no_ssl]
 
   DEFAULTS = {

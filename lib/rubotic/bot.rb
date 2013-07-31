@@ -110,7 +110,7 @@ class Rubotic::Bot
     host   ||= 'localhost'
     domain ||= 'localdomain'
 
-    @queue.enqueue(IRCMessage.new(:user, Etc.getlogin, host, domain,
+    @queue.enqueue(IRCMessage.new(:user, @config.login || Etc.getlogin, host, domain,
         @config.name, trailing: true))
 
     @queue.enqueue(IRCMessage.new(:join, @config.channel))
