@@ -11,15 +11,15 @@ module KarmaCommands
 
   class Commands::PlusOne < Rubotic::Command
     trigger   "+1"
-    arguments [:who, :what]
-    usage     '+1 <username> "start of message to star"'
-    describe  "+1 something that someone said"
+    arguments (1..2)
+    usage     '+1 <username> ["start of message"]'
+    describe  "like something that someone said"
 
-    def invoke(who, what, event)
+    def invoke(event, who, what = '')
       who.downcase!
       what.downcase!
 
-      target = bot.event_history.find do |e|
+      target = bot.event_history.reverse.find do |e|
         (e.command == :privmsg &&
           e.from.nick.downcase == who &&
           e.args.last.downcase.start_with?(what))
@@ -42,13 +42,14 @@ module KarmaCommands
 
   class Commands::Karma < Rubotic::Command
     trigger   "!karma"
-    arguments []
     usage     "!karma"
     describe  "show the top 5 most liked messages"
+
     def invoke(event)
       KarmaCommands.plussed.sort_by{|msg, score| -score}.map do |msg, score|
         respond_to(event, "[+#{score}] #{msg.from.nick}: #{msg.args.last}")
       end.take(5)
     end
+
   end
 end

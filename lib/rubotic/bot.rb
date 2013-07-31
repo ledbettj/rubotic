@@ -69,14 +69,14 @@ class Rubotic::Bot
     if cmd
       args = Shellwords.shellwords(msg.args.last[cmd.class.trigger.length..-1])
 
-      if args.length != cmd.class.arguments.length
+      if !cmd.class.arguments.cover?(args.length)
         rc = Rubotic::Bot::IRCMessage.new(:privmsg,
           msg.from,
           "usage: #{cmd.class.usage}",
           trailing: true
         )
       else
-        rc = cmd.invoke(*args, msg)
+        rc = cmd.invoke(msg, *args)
       end
     end
     Array(rc).flat_map.select{ |r| r.is_a?(Rubotic::Bot::IRCMessage) }

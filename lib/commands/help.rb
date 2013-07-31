@@ -1,6 +1,5 @@
   class Commands::Help < Rubotic::Command
     trigger   "!help"
-    arguments []
     usage     '!help'
     describe  'show all registered bot commands'
 

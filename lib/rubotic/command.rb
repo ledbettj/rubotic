@@ -21,9 +21,9 @@ class Rubotic::Command
       @trigger
     end
 
-    def arguments(args = nil)
-      @arguments = args if args
-      @arguments || []
+    def arguments(range = nil)
+      @arguments = range if range
+      @arguments || (0..0)
     end
 
     def usage(response = nil)
