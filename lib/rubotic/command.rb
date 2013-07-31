@@ -41,6 +41,10 @@ class Rubotic::Command
 
   def initialize(bot)
     @bot = bot
+    self.setup
+  end
+
+  def setup
   end
 
   def respond_to(event, with, flags = {})

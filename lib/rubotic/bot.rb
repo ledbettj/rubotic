@@ -1,23 +1,27 @@
 require 'etc'
-
+require 'sqlite3'
+require 'sequel'
 class Rubotic::Bot
 
   attr_reader :config
   attr_reader :event_history
   attr_reader :commands
+  attr_reader :db
 
   MAX_HISTORY = 100
 
   def initialize
+
+    @event_history = []
+    @config     = Rubotic::Config.new
+    @connection = Connection.new
+    @queue      = MessageQueue.new
+    @db         = Sequel.sqlite(@config.database)
+
     @commands   = Rubotic::Command.registered.map do |cmd|
       cmd.send(:new, self)
     end
 
-    @event_history = []
-
-    @config     = Rubotic::Config.new
-    @connection = Connection.new
-    @queue      = MessageQueue.new
     @dispatch   = Dispatch.new do
       on :ping do |bot, msg|
         puts "Ping? Pong!"

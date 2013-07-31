@@ -19,7 +19,7 @@ class Rubotic::Config
     end
   end
 
-  define_setters :server, :port, :password, :nick, :name, :channel, :login
+  define_setters :server, :port, :password, :nick, :name, :channel, :login, :database
   define_boolean_setters [:ssl, :no_ssl]
 
   DEFAULTS = {
@@ -28,7 +28,8 @@ class Rubotic::Config
     port:    6667,
     nick:    "guest#{Random.new.rand(1000)}",
     name:    'Rubotic User',
-    channel: '#rubotic'
+    channel: '#rubotic',
+    database: 'rubotic.db'
   }
 
   def initialize(opts = {})
