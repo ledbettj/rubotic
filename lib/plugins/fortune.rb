@@ -6,7 +6,7 @@ class FortunePlugin < Rubotic::Plugin
     arguments 0..0
 
     run do |event|
-      respond_to(event, `fortune -as`.gsub(/\s+/, ' '), trailing: true)
+      respond_to(event, `fortune -as`.gsub(/\s+/, ' '))
     end
   end
 end
