@@ -5,3 +5,4 @@ gemspec
 
 gem 'sequel'
 gem 'sqlite3'
+gem 'ruby_reddit_api'
