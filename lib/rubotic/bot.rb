@@ -38,6 +38,10 @@ class Rubotic::Bot
     end
   end
 
+  def plugins
+    @plugman.plugins
+  end
+
   def configure(&blk)
     @config.configure(&blk)
   end

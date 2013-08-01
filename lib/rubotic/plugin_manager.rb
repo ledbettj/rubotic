@@ -1,6 +1,8 @@
-require 'Shellwords'
+require 'shellwords'
 
 class Rubotic::PluginManager
+  attr_reader :plugins
+
   def initialize(bot)
     @plugins = Rubotic::Plugin.registered.map{ |p| p.send(:new, bot) }
   end
