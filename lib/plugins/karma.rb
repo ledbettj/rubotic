@@ -15,9 +15,22 @@ class KarmaPlugin < Rubotic::Plugin
     end
   end
 
-  command '!karma' do
-    describe 'show the top 5 karma leaders'
+  command '!karma-leaders' do
+    describe 'show the top 5 users with the most karma'
 
+    run do |event|
+      results = bot.db[:karma].select(
+        Sequel.function(:sum, :score).as(:total), :user
+      ).group(:user).order(Sequel.desc(:total)).limit(5).all
+
+      results.map do |e|
+        respond_to(event, "[+#{e[:total]}] #{e[:user]}")
+      end
+    end
+  end
+
+  command '!karma' do
+    describe 'show the top 5 karma messages'
     run do |event|
       list_karma(event)
     end
