@@ -26,8 +26,15 @@ module KarmaCommands
     ).limit(count).all
   end
 
-  def self.create_table(db)
+  def self.leaderboard(db, count)
+    db[:karma].select {[:user, Sequel.as(sum(:score), :score)]}.group(
+      :user
+    ).order(
+      Sequel.desc(:score)
+    ).limit(count).all
+  end
 
+  def self.create_table(db)
     db.create_table?(:karma) do
       primary_key :id
       String  :user,    null: false
@@ -94,4 +101,20 @@ module KarmaCommands
     end
 
   end
+
+  class Commands::LeaderBoard < Rubotic::Command
+    trigger  "!leaderboard"
+    usage    "!leaderboard [howmany]"
+    describe "Show the top 5 Users"
+
+    def invoke(event, count = 5)
+      count = count.to_i
+      count = count <= 0 ? 5 : count
+      KarmaCommands.leaderboard(bot.db, count).map do |user_score|
+        respond_to(event, 
+          "#{user_score[:user]}: +#{user_score[:score]}")
+      end
+    end
+  end
 end
+
