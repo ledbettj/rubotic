@@ -23,5 +23,28 @@ via Plugins.
 
 ## Plugins
 
-    Er, they don't exist yet.  Check back later.
+Plugins go in the `/lib/plugin` folder and look like this:
+
+    class MyPlugin < Rubotic::Plugin
+      describe "a simple plugin"
+
+      command '!hello' do
+        describe  "say hello world"
+        arguments 0..1
+        usage     "[who]"
+
+        run do |event, who = nil|
+          who ||= default_who
+          respond_to(event, "Hello, #{who}!")
+        end
+      end
+
+      def initialize(bot)
+        @bot = bot
+      end
+
+      def default_who
+        "WORLD!"
+      end
+    end
 
