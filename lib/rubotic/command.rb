@@ -1,60 +1,34 @@
-require 'shellwords'
-
 class Rubotic::Command
-  class << self
-    def inherited(base)
-      @@commands ||= []
-      unless @@commands.include?(base)
-        @@commands << base
-        base.extend(ClassMethods)
-      end
-    end
 
-    def registered
-      @@commands ||= []
-    end
+  def initialize(trigger, &blk)
+    @describe  = ''
+    @arguments = 0..0
+    @usage     = ''
+    @handler   = ->(*args){ }
+
+    self.instance_eval(&blk)
   end
 
-  module ClassMethods
-    def trigger(arg = nil)
-      @trigger = arg.downcase if arg
-      @trigger
-    end
-
-    def arguments(range = nil)
-      @arguments = range if range
-      @arguments || (0..0)
-    end
-
-    def usage(response = nil)
-      @usage_msg = response if response
-      @usage_msg
-    end
-
-    def describe(desc = nil)
-      @describe = desc if desc
-      @describe
-    end
+  def describe(msg = nil)
+    @describe = msg if msg
+    @describe
   end
 
-  attr_reader :bot
-
-  def initialize(bot)
-    @bot = bot
-    self.setup
+  def usage(msg = nil)
+    @usage = msg if msg
+    @usage
   end
 
-  def setup
+  def arguments(range = nil)
+    @arguments = range if range
+    @arguments
   end
 
-  def respond_to(event, with, flags = {})
-    from = event.from.nick
-    to  = event.args.first
+  def run(&blk)
+    @handler = blk
+  end
 
-    Rubotic::Bot::IRCMessage.new(:privmsg,
-      (flags[:private] || !to.start_with?('#')) ? from : to,
-      with,
-      trailing: true
-    )
+  def invoke!(on, event, *args)
+    on.instance_exec(event, *args, &@handler)
   end
 end

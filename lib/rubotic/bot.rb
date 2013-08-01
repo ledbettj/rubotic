@@ -1,26 +1,23 @@
 require 'etc'
 require 'sqlite3'
 require 'sequel'
+
 class Rubotic::Bot
 
   attr_reader :config
-  attr_reader :event_history
-  attr_reader :commands
+  attr_reader :history
   attr_reader :db
 
   MAX_HISTORY = 100
 
   def initialize
 
-    @event_history = []
+    @history    = []
     @config     = Rubotic::Config.new
     @connection = Connection.new
     @queue      = MessageQueue.new
     @db         = Sequel.sqlite(@config.database)
-
-    @commands   = Rubotic::Command.registered.map do |cmd|
-      cmd.send(:new, self)
-    end
+    @plugman    = Rubotic::PluginManager.new(self)
 
     @dispatch   = Dispatch.new do
       on :ping do |bot, msg|
@@ -34,6 +31,10 @@ class Rubotic::Bot
       unhandled do |bot, msg|
         puts "Unhandled: #{msg}"
       end
+    end
+
+    @dispatch.on(:privmsg) do |bot, msg|
+      @plugman.dispatch(msg)
     end
   end
 
@@ -63,35 +64,14 @@ class Rubotic::Bot
   private
 
   def log_history(*events)
-    events.each{ |event| @event_history.push(event) }
-    @event_history.shift while @event_history.size > MAX_HISTORY
-  end
-
-  def dispatch_command(msg)
-    rc  = []
-    cmd = @commands.find{ |c| msg.args.last.start_with?(c.class.trigger) }
-    if cmd
-      args = Shellwords.shellwords(msg.args.last[cmd.class.trigger.length..-1])
-
-      if !cmd.class.arguments.cover?(args.length)
-        rc = Rubotic::Bot::IRCMessage.new(:privmsg,
-          msg.from,
-          "usage: #{cmd.class.usage}",
-          trailing: true
-        )
-      else
-        rc = cmd.invoke(msg, *args)
-      end
-    end
-    Array(rc).flat_map.select{ |r| r.is_a?(Rubotic::Bot::IRCMessage) }
+    @history += events
+    overflow = @history.size - MAX_HISTORY
+    @history.shift(overflow) if overflow > 0
   end
 
   def dispatch(msg)
     log_history(msg)
     responses = @dispatch.dispatch(msg.command, self, msg)
-    @queue.enqueue(*responses) if responses && responses.any?
-
-    responses = dispatch_command(msg) if msg.command == :privmsg
     @queue.enqueue(*responses) if responses && responses.any?
   end
 
