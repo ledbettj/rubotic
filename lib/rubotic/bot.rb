@@ -19,22 +19,23 @@ class Rubotic::Bot
     @db         = Sequel.sqlite(@config.database)
     @plugman    = Rubotic::PluginManager.new(self)
 
-    @dispatch   = Dispatch.new do
-      on :ping do |bot, msg|
-        puts "Ping? Pong!"
-        IRCMessage.new(:pong, msg.args.first)
-      end
-      on :privmsg do |bot, msg|
-        puts "Privmsg: #{msg}"
-      end
+    @dispatch   = Dispatch.new
 
-      unhandled do |bot, msg|
-        puts "Unhandled: #{msg}"
-      end
+    @dispatch.on(:ping) do |bot, msg|
+      IRCMessage.new(:pong, msg.args.first)
     end
 
     @dispatch.on(:privmsg) do |bot, msg|
       @plugman.dispatch(msg)
+    end
+
+    @dispatch.on(:'433') do |bot, msg|
+      config.nick(bot.config.nick + Time.now.to_i.to_s(36))
+      send_nick
+    end
+
+    @dispatch.on(IRCMessage::MOTD_END) do |bot, msg|
+      join(@config.channel)
     end
   end
 
@@ -88,19 +89,36 @@ class Rubotic::Bot
   end
 
   def login
-    @queue.enqueue(
-      IRCMessage.new(:pass, @config.password)
-    ) unless @config.password.nil?
+    send_pass unless @config.password.nil?
+    send_nick
+    send_user
+  end
 
+  def send_pass
+    @queue.enqueue(IRCMessage.new(:pass, @config.password))
+  end
+
+  def send_nick
     @queue.enqueue(IRCMessage.new(:nick, @config.nick))
+  end
 
+  def send_user
     host, domain = Socket.gethostbyname(Socket.gethostname).first.split('.', 2)
     host   ||= 'localhost'
     domain ||= 'localdomain'
 
-    @queue.enqueue(IRCMessage.new(:user, @config.login || Etc.getlogin, host, domain,
-        @config.name, trailing: true))
+    @queue.enqueue(
+      IRCMessage.new(:user,
+        @config.login || Etc.getlogin,
+        host,
+        domain,
+        @config.name,
+        trailing: true
+      )
+    )
+  end
 
-    @queue.enqueue(IRCMessage.new(:join, @config.channel))
+  def join(channel, key = nil)
+    @queue.enqueue(IRCMessage.new(:join, *([channel, key].compact)))
   end
 end

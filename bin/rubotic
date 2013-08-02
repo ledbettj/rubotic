@@ -1,14 +1,59 @@
 #!/usr/bin/env ruby
+require 'rubygems'
+require 'bundler/setup'
+
+lib = File.expand_path('../../lib', __FILE__)
+$LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
+
+Bundler.require(:default, :plugins)
 
 require 'rubotic'
 require 'plugins'
 
 b = Rubotic::Bot.new
+IRCMessage = Rubotic::Bot::IRCMessage
 
 b.configure do
   server 'irc.freenode.org'
   port   6667
   nick   'rubotic'
+end
+
+def display(event, *args)
+  line = args.join('')
+  stamp = Time.now.strftime('%H:%M:%S')
+  puts "[#{stamp}|#{event.command.to_s.upcase[0..3]}] #{line}"
+end
+
+b.events do
+  on(:privmsg) do |bot, event|
+    display(event, '[', event.args.first, '] ', event.from, ': ', event.args.last)
+  end
+
+  on(:notice) do |bot, event|
+    display(event, '[', event.args.first, '] ', event.from, ': ', event.args.last)
+  end
+
+  on(IRCMessage::MOTD) do |bot, event|
+    display(event, event.from, ": ", event.args.last)
+  end
+
+  on(:join) do |bot, event|
+    display(event, '[', event.args.last, '] ', event.from, " has joined")
+  end
+
+  on(:part) do |bot, event|
+    display(event, '[', event.args.last, '] ', event.from, " has left")
+  end
+
+  on(:mode) do |bot, event|
+    display(event, '[', event.args.first, '] ', event.from, " set mode ", event.args.last)
+  end
+
+  unhandled do |bot, event|
+    display(event, "Unhandled: ", event)
+  end
+
 end
 
 b.run

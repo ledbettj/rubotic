@@ -3,6 +3,10 @@ class Rubotic::Bot::IRCMessage
   attr_accessor :from
   attr_accessor :trailing
 
+  MOTD = :'372'
+  MOTD_START = :'375'
+  MOTD_END   = :'376'
+
   def initialize(command, *args)
     opts = args.pop if args.any? && args.last.is_a?(Hash)
     opts ||= {}

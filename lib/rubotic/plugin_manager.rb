@@ -4,7 +4,13 @@ class Rubotic::PluginManager
   attr_reader :plugins
 
   def initialize(bot)
-    @plugins = Rubotic::Plugin.registered.map{ |p| p.send(:new, bot) }
+    @plugins = Rubotic::Plugin.registered.map do |p|
+      p.send(:new, bot) rescue nil
+    end.compact
+
+    @plugins.each do |p|
+      puts "Loaded #{p.class.name}: #{p.class.description}"
+    end
   end
 
   def dispatch(event)

@@ -2,7 +2,7 @@ class Rubotic::Bot::Dispatch
   def initialize(&blk)
     @handlers  = {}
     @unhandled = []
-    self.instance_eval(&blk)
+    self.instance_eval(&blk) unless blk.nil?
   end
 
   def on(cmd, &blk)
