@@ -4,8 +4,7 @@ class RedditPlugin < Rubotic::Plugin
   describe "Returns results from reddit"
 
   command '!aww' do
-    describe  "returns a random cute picture."
-    arguments 0..0
+    describe  "returns a random cute picture from the front page of r/aww."
 
     run do |event|
       item = @client.browse('aww').sample
