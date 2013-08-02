@@ -41,14 +41,14 @@ class Rubotic::Plugin
   end
 
   def invoke!(event, cmd, *args)
-    cmd_class = self.class.commands[cmd]
+    c = self.class.commands[cmd]
 
-    if cmd_class.arguments.cover?(args.length)
-      cmd_class.invoke!(self, event, *args)
+    if c.arguments.cover?(args.length)
+      c.invoke!(self, event, *args)
     else
       Rubotic::Bot::IRCMessage.new(:privmsg,
         event.from.nick,
-        "usage: #{cmd} #{cmd_class.usage}",
+        "usage: #{cmd} #{c.usage}",
         trailing: true
       )
     end
