@@ -48,3 +48,4 @@ Plugins go in the `/lib/plugin` folder and look like this:
       end
     end
 
+By default, all plugins are loaded if the `plugin` module is required.
