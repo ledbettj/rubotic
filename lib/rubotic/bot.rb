@@ -65,6 +65,9 @@ class Rubotic::Bot
     disconnect
   end
 
+  def quit(msg = "")
+    @connection.write("QUIT :#{msg}\r\n")
+  end
 
   private
 
