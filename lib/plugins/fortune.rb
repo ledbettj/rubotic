@@ -6,7 +6,13 @@ class FortunePlugin < Rubotic::Plugin
     arguments 0..0
 
     run do |event|
-      respond_to(event, `fortune -as`.gsub(/\s+/, ' '))
+      respond_to(event, `#{cmdline}`.gsub(/\s+/, ' '))
     end
+  end
+
+  private
+
+  def cmdline
+    config['cmdline'] || 'fortune -as'
   end
 end

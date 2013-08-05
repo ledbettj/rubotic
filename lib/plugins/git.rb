@@ -28,8 +28,7 @@ class GitPlugin < Rubotic::Plugin
   end
 
   def do_update!
-    root = File.expand_path('../../../', __FILE__)
-    Dir.chdir(root)
+    Dir.chdir(Rubotic.root)
     bot.quit("Rubotic update in progress...")
     `git merge origin/master`
     `bundle install`

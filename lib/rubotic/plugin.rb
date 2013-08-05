@@ -54,6 +54,13 @@ class Rubotic::Plugin
     end
   end
 
+  def config()
+    @config ||= YAML.load_file(
+      File.join(Rubotic.root, 'config', 'plugins',
+        "#{self.class.name.downcase.gsub('plugin', '')}.yml")
+    ) rescue {}
+  end
+
   private
 
   def respond_to(event, with, flags = {})
