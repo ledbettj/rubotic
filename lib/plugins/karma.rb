@@ -30,9 +30,11 @@ class KarmaPlugin < Rubotic::Plugin
   end
 
   command '!karma' do
-    describe 'show the top 5 karma messages'
-    run do |event|
-      list_karma(event)
+    describe  'show the top 5 karma messages'
+    arguments 0..1
+    usage     '[username]'
+    run do |event, username = nil|
+      list_karma(event, username)
     end
 
   end
@@ -95,10 +97,10 @@ class KarmaPlugin < Rubotic::Plugin
     end
   end
 
-  def list_karma(event)
-    scores = bot.db[:karma].select(:user, :message, :score).order(
-      Sequel.desc(:score)
-    ).limit(5).all
+  def list_karma(event, user = nil)
+    query = bot.db[:karma].select(:user, :message, :score)
+    query = query.where(user: user) unless user.nil?
+    scores = query.order(Sequel.desc(:score)).limit(5).all
 
     scores.map do |s|
       respond_to(event, "[+#{s[:score]}] #{s[:user]}: #{s[:message]}")
