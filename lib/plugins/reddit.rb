@@ -20,10 +20,11 @@ class RedditPlugin < Rubotic::Plugin
     run do |event, subreddit|
       if blacklisted?(subreddit)
         respond_to(event, "Sorry, that subreddit is not allowed.")
-      else
-        item = @client.browse(subreddit, limit: 50).sample
+      elsif (item = @client.browse(subreddit, limit: 50).shuffle.find{ |i| allow_nsfw? || !i.over_18 })
         respond_to(event,
           "[#{sprintf('+%d', item.score)}] #{truncate(item.title)} (#{item.url})")
+      else
+        respond_to(event, "Sorry, couldn't find a SFW link from that subreddit.")
       end
     end
   end
@@ -35,6 +36,10 @@ class RedditPlugin < Rubotic::Plugin
 
   def truncate(text, length=38)
     text[0..length].gsub(/\s\w+$/, '...')
+  end
+
+  def allow_nsfw?
+    !!config['allow_nsfw']
   end
 
   def blacklisted?(subreddit)

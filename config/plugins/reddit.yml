@@ -3,3 +3,5 @@ blacklist:
   - gore
   - wtf
   - popping
+
+allow_nsfw: false
