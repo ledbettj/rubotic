@@ -18,9 +18,13 @@ class RedditPlugin < Rubotic::Plugin
     usage     '<subreddit>'
 
     run do |event, subreddit|
-      item = @client.browse(subreddit, limit: 50).sample
-      respond_to(event,
+      if blacklisted?(subreddit)
+        respond_to(event, "Sorry, that subreddit is not allowed.")
+      else
+        item = @client.browse(subreddit, limit: 50).sample
+        respond_to(event,
           "[#{sprintf('+%d', item.score)}] #{truncate(item.title)} (#{item.url})")
+      end
     end
   end
 
@@ -31,6 +35,11 @@ class RedditPlugin < Rubotic::Plugin
 
   def truncate(text, length=38)
     text[0..length].gsub(/\s\w+$/, '...')
+  end
+
+  def blacklisted?(subreddit)
+    @blacklist ||= (config['blacklist'] || []).map(&:downcase)
+    @blacklist.include?(subreddit.strip.downcase)
   end
 
 end
