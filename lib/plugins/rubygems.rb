@@ -14,7 +14,8 @@ class RubygemsPlugin < Rubotic::Plugin
       when 404
         respond_to(event, "#{gem_name} wasn't found.")
       when 200
-        respond_to(event, "#{resp['name']}: #{resp['info']} (#{resp['homepage_uri']})")
+        info = resp['info'].gsub(/[\r\n]+/, ' ')
+        respond_to(event, "#{resp['name']}: #{info} (#{resp['homepage_uri']})")
       else
         respond_to(event, "#{gem_name} - API returned #{resp.code}")
       end
