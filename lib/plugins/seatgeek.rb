@@ -1,3 +1,5 @@
+require 'date'
+
 class SeatGeekPlugin < Rubotic::Plugin
   describe 'search seatgeek api for tickets'
 
@@ -18,7 +20,12 @@ class SeatGeekPlugin < Rubotic::Plugin
 
     if resp['events'].any?
       resp['events'].take(3).map do |event|
-        "#{event['title']} @ #{event['venue']['name']} [#{event['venue']['city']}] on #{event['datetime_local'] || 'TBD'}"
+        at = if event['date_tbd']
+               'TBD'
+             else
+               Date.parse(event['datetime_local']).strftime('%a %b %d %Y')
+             end
+        "#{event['title']} @ #{event['venue']['name']} [#{event['venue']['city']}] on #{at}"
       end
     else
       ['No results found :(']
