@@ -29,7 +29,7 @@ class GitPlugin < Rubotic::Plugin
 
   def do_update!
     Dir.chdir(Rubotic.root)
-    bot.quit("Rubotic update in progress...")
+    bot.quit("Upgrade to #{@commits.first}")
     `git merge origin/master`
     `bundle install`
     `bundle exec bin/rubotic`
@@ -38,7 +38,7 @@ class GitPlugin < Rubotic::Plugin
 
   def update_self(event)
     fetch
-    if missing_commits.split("\n").length > 0
+    if (@commits = missing_commits.split("\n")).length > 0
       do_update!
     else
       respond_to(event, "No updates found")
