@@ -14,7 +14,7 @@ class Rubotic::PluginManager
   end
 
   def dispatch(event)
-    cmd, *args = Shellwords.shellwords(event.args.last)
+    cmd, *args = parse_line(event.args.last)
 
     if (p = @plugins.find{ |plug| plug.accepts?(cmd) })
       p.invoke!(event, cmd, *args)
@@ -25,6 +25,17 @@ class Rubotic::PluginManager
     (err.backtrace || []).each do |line|
       puts "  #{line}"
     end
-
   end
+
+  private
+
+  # try to use shellwords first, otherwise fall back to simple split.
+  def parse_line(line)
+    begin
+      Shellwords.shellwords(line)
+    rescue ArgumentError
+      line.split(/\s+/)
+    end
+  end
+
 end
