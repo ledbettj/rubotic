@@ -67,11 +67,14 @@ class Rubotic::Plugin
     from = event.from.nick
     to  = event.args.first
 
-    Rubotic::Bot::IRCMessage.new(:privmsg,
-      (flags[:private] || !to.start_with?('#')) ? from : to,
-      with,
-      trailing: true
+    bot.enqueue(
+      Rubotic::Bot::IRCMessage.new(:privmsg,
+        (flags[:private] || !to.start_with?('#')) ? from : to,
+        with,
+        trailing: true
+      )
     )
+    nil
   end
 
 end

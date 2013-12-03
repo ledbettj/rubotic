@@ -69,6 +69,10 @@ class Rubotic::Bot
     @connection.write("QUIT :#{msg}\r\n")
   end
 
+  def enqueue(*messages)
+    messages.each{ |msg| @queue.enqueue(msg) }
+  end
+
   private
 
   def log_history(*events)
