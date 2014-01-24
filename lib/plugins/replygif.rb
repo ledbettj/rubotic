@@ -32,7 +32,7 @@ class ReplygifPlugin < Rubotic::Plugin
   end
 
   command 'wtf' do
-    arguments 0..0
+    arguments 0..100
 
     run do |event|
       respond_to(event, random_reaction('what-the-fuck'))
@@ -40,7 +40,7 @@ class ReplygifPlugin < Rubotic::Plugin
   end
 
   command 'lol' do
-    arguments 0..0
+    arguments 0..100
 
     run do |event|
       respond_to(event, random_reaction('laugh'))
@@ -48,7 +48,7 @@ class ReplygifPlugin < Rubotic::Plugin
   end
 
   command 'wat' do
-    arguments 0..0
+    arguments 0..100
 
     run do |event|
       respond_to(event, random_reaction('what'))
