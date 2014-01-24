@@ -31,6 +31,30 @@ class ReplygifPlugin < Rubotic::Plugin
     end
   end
 
+  command 'wtf' do
+    arguments 0..0
+
+    run do |event|
+      respond_to(event, random_reaction('what-the-fuck'))
+    end
+  end
+
+  command 'lol' do
+    arguments 0..0
+
+    run do |event|
+      respond_to(event, random_reaction('laugh'))
+    end
+  end
+
+  command 'wat' do
+    arguments 0..0
+
+    run do |event|
+      respond_to(event, random_reaction('what'))
+    end
+  end
+
   def categories
     @categories ||= build_categories
   end
