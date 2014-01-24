@@ -8,4 +8,5 @@ gem 'httparty'
 
 group :plugins do
   gem 'ruby_reddit_api'
+  gem 'nokogiri'
 end
