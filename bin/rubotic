@@ -14,7 +14,7 @@ b = Rubotic::Bot.new
 IRCMessage = Rubotic::Bot::IRCMessage
 
 b.configure do
-  server 'irc.freenode.org'
+  server 'chat.freenode.net'
   port   6667
   nick   'rubotic'
 end
