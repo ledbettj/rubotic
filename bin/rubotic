@@ -13,11 +13,7 @@ require 'plugins'
 b = Rubotic::Bot.new
 IRCMessage = Rubotic::Bot::IRCMessage
 
-b.configure do
-  server 'chat.freenode.net'
-  port   6667
-  nick   'rubotic'
-end
+b.config.load(File.join(File.expand_path('../../', __FILE__), 'config', 'rubotic.yml'))
 
 def display(event, *args)
   line = args.join('')

@@ -1,0 +1,10 @@
+server:  chat.freenode.net
+port:    6667
+ssl:     false
+channel: "#rubotic"
+
+nick:    rubotic
+login:   rubotic
+name:    Rubotic User
+
+database: rubotic.db

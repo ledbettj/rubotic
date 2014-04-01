@@ -42,4 +42,8 @@ class Rubotic::Config
     self.instance_eval(&blk)
     self
   end
+
+  def load(file)
+    YAML.load_file(file).each { |key, value| self.send(key, value) }
+  end
 end
