@@ -5,12 +5,12 @@ class LunchPlugin < Rubotic::Plugin
 
   command '!lunch' do
     describe 'return a random lunch place nearby'
-    arguments 0..100
+    arguments 0..1
 
     run do |event, *args|
       if loc = location_for(event.from.nick)
-        term = args.any? ? args.join(' ') : nil
-        respond_to(event, "How about #{lunch_at(loc, term)}?")
+        radius = args.any? && args.first.match(/\d+/) ? args.first.to_f : 3.0
+        respond_to(event, "How about #{lunch_at(loc, radius)}?")
       else
         respond_to(event, "Set your location first (!location)")
       end
@@ -59,12 +59,12 @@ class LunchPlugin < Rubotic::Plugin
     resp['results'][0]['geometry']['location']
   end
 
-  def lunch_at(loc, term)
+  def lunch_at(loc, radius)
     resp = HTTParty.get(YELP_URL, query: {
-        term: term || 'food',
+        term: 'food',
         lat: loc[:lat],
         long: loc[:long],
-        radius: 3,
+        radius: radius,
         limit: 20,
         ywsid: config['ywsid']
       })
