@@ -17,9 +17,9 @@ class Rubotic::Bot
     @connection = Connection.new
     @queue      = MessageQueue.new
     @db         = Sequel.sqlite(@config.database)
+    @dispatch   = Dispatch.new
     @plugman    = Rubotic::PluginManager.new(self)
 
-    @dispatch   = Dispatch.new
 
     @dispatch.on(:ping) do |bot, msg|
       IRCMessage.new(:pong, msg.args.first)
