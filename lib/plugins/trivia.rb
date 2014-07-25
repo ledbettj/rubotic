@@ -65,6 +65,7 @@ class TriviaPlugin < Rubotic::Plugin
   private
 
   attr_reader :current_question
+  attr_reader :asked_at
 
   def point_for(who)
     row = @bot.db[:trivia_scores].where(nick: who).first
