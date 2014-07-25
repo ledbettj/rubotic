@@ -36,6 +36,9 @@ class TriviaPlugin < Rubotic::Plugin
     run do |event|
       if current_question && timed_out?
         respond_to(event, "The answer was: #{current_question[:answer]}.  Use !trivia for a new question.", private: false)
+        clear_question
+      elsif current_question
+        respond_to(event, "You can give up in #{asked_at + 30 - Time.now} seconds")
       end
     end
   end
