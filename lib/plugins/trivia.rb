@@ -18,7 +18,15 @@ class TriviaPlugin < Rubotic::Plugin
   end
 
   command '!score' do
-    
+    describe 'see trivia scores for a user'
+    usage '<user>'
+    arguments 1
+
+    run do |event, who|
+      row = @bot.db[:trivia_scores].where(nick: who).first
+      pts = row ? row[:score] : 0
+      respond_to(event, "#{who}: #{pts} points.")
+    end
   end
 
   command '!answer' do
