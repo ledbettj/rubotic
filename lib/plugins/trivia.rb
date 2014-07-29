@@ -8,6 +8,12 @@ class TriviaPlugin < Rubotic::Plugin
     arguments 0..0
 
     run do |event|
+      if !event.args.first.start_with?('#')
+        respond_to(event, "-1 for trying to cheat you dick.")
+        point_for(event.from.nick, -1)
+        return
+      end
+
       if !current_question
         new_question
         respond_to(event, "#{current_question[:category]}: #{current_question[:question]}", private: false)
@@ -67,12 +73,12 @@ class TriviaPlugin < Rubotic::Plugin
   attr_reader :current_question
   attr_reader :asked_at
 
-  def point_for(who)
+  def point_for(who, amount=1)
     row = @bot.db[:trivia_scores].where(nick: who).first
     if row
-      @bot.db[:trivia_scores].where(nick: who).update(score: row[:score] + 1)
+      @bot.db[:trivia_scores].where(nick: who).update(score: row[:score] + amount)
     else
-      @bot.db[:trivia_scores].insert(nick: who, score: 1)
+      @bot.db[:trivia_scores].insert(nick: who, score: amount)
     end
   end
 
