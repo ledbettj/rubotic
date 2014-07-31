@@ -56,7 +56,7 @@ class TriviaPlugin < Rubotic::Plugin
     run do |event, *args|
       if current_question
         answer = args.join(' ').downcase
-        if current_question[:answer].downcase == answer
+        if right_answer(answer)
           clear_question
           point_for(event.from.nick)
           respond_to(event, "#{event.from.nick} is right! Huzzah! Use !trivia for a new question.", private: false)
@@ -69,6 +69,11 @@ class TriviaPlugin < Rubotic::Plugin
   end
 
   private
+
+  def right_answer(answer)
+    q = current_question
+    q[:answer].downcase == answer || (q[:regexp] && q[:regexp].match(answer))
+  end
 
   attr_reader :current_question
   attr_reader :asked_at
