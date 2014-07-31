@@ -2,6 +2,7 @@ require 'socket'
 require 'openssl'
 
 class Rubotic::Bot::Connection
+  attr_reader :last_io_at
 
   def initialize
     @buf = ''
@@ -16,10 +17,15 @@ class Rubotic::Bot::Connection
        @s.connect
      end
     @connected = true
+    mark_io
   end
 
   def connected?
     @connected
+  end
+
+  def idle?(seconds = 30)
+    last_io_at <= Time.now - seconds
   end
 
   def disconnect
@@ -30,6 +36,7 @@ class Rubotic::Bot::Connection
 
   def write(msg)
     @s.write("#{msg}\n")
+    mark_io
   end
 
   def read_messages
@@ -42,6 +49,7 @@ class Rubotic::Bot::Connection
         disconnect
         break
       end
+      mark_io
     end
 
     while (i = @buf.index("\n"))
@@ -50,6 +58,12 @@ class Rubotic::Bot::Connection
     end
 
     lines
+  end
+
+  private
+
+  def mark_io
+    @last_io_at = Time.now
   end
 
 end

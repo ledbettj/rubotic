@@ -61,6 +61,8 @@ class Rubotic::Bot
         outbound.from = Rubotic::Bot::Nick.parse(@config.nick)
         log_history(outbound)
       end
+
+      @connection.write("PING youstilltherebro?") if @connection.idle?
     end
     disconnect
   end
