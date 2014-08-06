@@ -31,7 +31,7 @@ class ZorkPlugin < Rubotic::Plugin
   def command(what)
     w.write("#{what}\n")
     sleep(0.25)
-    read_to_block.join(' ').gsub(/^.*Moves: \d\s++/, '')
+    read_to_block.join(' ').gsub(/^.*Moves:\s+\d+\s+/, '')
   end
 
   def start_zork
