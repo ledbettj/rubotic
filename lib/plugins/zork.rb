@@ -14,9 +14,10 @@ class ZorkPlugin < Rubotic::Plugin
   end
 
   command '!zork' do
-    arguments 0..0
-    run do |event|
-      respond_to(event, start_zork) if r.nil?
+    arguments 0..1
+    run do |event, arg = '1'|
+      arg = '1' unless ('1'..'3').cover?(arg)
+      respond_to(event, start_zork(arg.to_i - 1))
     end
   end
 
@@ -34,8 +35,8 @@ class ZorkPlugin < Rubotic::Plugin
     read_to_block.join(' ').gsub(/^.*Moves:\s+\d+\s+/, '')
   end
 
-  def start_zork
-    @r, @w, @pid = PTY.spawn(config['dfrotz'], "-p", "-w", "1000", config['zork'])
+  def start_zork(which = 0)
+    @r, @w, @pid = PTY.spawn(config['dfrotz'], "-p", "-w", "1000", config['zork'][which])
     sleep(0.25)
     keep = false
     read_to_block.select do |line|

@@ -1,3 +1,6 @@
 dfrotz: /path/to/dfrotz
-zork:   /path/to/ZORK1.DAT
+zork:
+  - /path/to/ZORK1.DAT
+  - /path/to/ZORK2.DAT
+  - /path/to/ZORK3.DAT
 
