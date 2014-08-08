@@ -3,10 +3,12 @@ require 'openssl'
 
 class Rubotic::Bot::Connection
   attr_reader :last_io_at
+  attr_accessor :auto_split
 
   def initialize
     @buf = ''
     @connected = false
+    @auto_split = true
   end
 
   def connect(host, port, opts = {})
@@ -35,7 +37,11 @@ class Rubotic::Bot::Connection
   end
 
   def write(msg)
-    @s.write("#{msg}\n")
+    if split?(msg)
+      write_split(msg)
+    else
+      @s.write("#{msg}\n")
+    end
     mark_io
   end
 
@@ -64,6 +70,24 @@ class Rubotic::Bot::Connection
 
   def mark_io
     @last_io_at = Time.now
+  end
+
+  def split?(msg)
+    return false unless (
+      auto_split &&
+      msg.is_a?(Rubotic::Bot::IRCMessage) &&
+      msg.command == :privmsg
+    )
+
+    return msg.to_s.length >= 510
+  end
+
+  def write_split(msg)
+    text = msg.args.last
+    text.scan(/.{1,510}/) do |part|
+      msg.args[-1] = part
+      @s.write("#{msg}\n")
+    end
   end
 
 end
