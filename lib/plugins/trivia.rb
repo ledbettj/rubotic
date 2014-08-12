@@ -3,6 +3,27 @@ require 'time'
 class TriviaPlugin < Rubotic::Plugin
   describe "let's play trivia"
 
+  command '!blacklist' do
+    arguments 0..0
+    describe 'blacklist a trivia question'
+
+    run do |event|
+      if current_question
+        q = current_question[:question]
+        a = current_question[:answer]
+        blacklist_index(@current_index)
+        clear_question
+        respond_to(event, "OK, I won't ask #{q} again. The answer was #{a}.")
+      elsif @last_index
+        q = config[:questions][@last_index][:question]
+        blacklist_index(@last_index)
+        respond_to(event, "OK, I won't ask #{q} again.")
+      else
+        respond_to(event, "no question to blacklist.")
+      end
+    end
+  end
+
   command '!trivia' do
     describe 'ask a trivia question'
     arguments 0..0
@@ -88,8 +109,15 @@ class TriviaPlugin < Rubotic::Plugin
   end
 
   def clear_question
+    @last_index       = @current_index
+    @current_index    = nil
     @current_question = nil
     @asked_at = nil
+  end
+
+  def blacklist_index(index)
+    config[:questions].delete_at(index)
+    save_config
   end
 
   def timed_out?
@@ -97,8 +125,13 @@ class TriviaPlugin < Rubotic::Plugin
   end
 
   def new_question
-    @current_question = config[:questions].sample
+    @current_index    = random_index
+    @current_question = config[:questions][@current_index]
     @asked_at = Time.now
+  end
+
+  def random_index
+    rand(0..config[:questions].length - 1)
   end
 
   def can_get_new?
@@ -107,6 +140,7 @@ class TriviaPlugin < Rubotic::Plugin
 
   def initialize(bot)
     @current_question = nil
+    @current_index    = nil
     @asked_at         = nil
 
     @bot = bot

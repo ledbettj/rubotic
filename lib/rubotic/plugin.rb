@@ -54,11 +54,19 @@ class Rubotic::Plugin
     end
   end
 
-  def config()
-    @config ||= YAML.load_file(
-      File.join(Rubotic.root, 'config', 'plugins',
-        "#{self.class.name.downcase.gsub('plugin', '')}.yml")
-    ) rescue {}
+  def config_file
+    File.join(
+      Rubotic.root, 'config', 'plugins',
+      "#{self.class.name.downcase.gsub('plugin', '')}.yml"
+    )
+  end
+
+  def config
+    @config ||= YAML.load_file(config_file) rescue {}
+  end
+
+  def save_config
+    File.write(config_file, YAML.dump(config))
   end
 
   private
