@@ -24,6 +24,20 @@ class TriviaPlugin < Rubotic::Plugin
     end
   end
 
+  
+  command '!vowels' do
+    describe 'give a hint'
+    arguments 0..0
+
+    run do |event|
+      if !current_question
+        respond_to(event, "Can't give hints because there's no current question. !trivia for a new question", private: false)
+      else
+        respond_to(event, current_question[:answer].gsub(/[^AaEeIiOoUu\s]/, '-'), private: false)
+      end
+    end
+  end
+
   command '!trivia' do
     describe 'ask a trivia question'
     arguments 0..0
