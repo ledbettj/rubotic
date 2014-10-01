@@ -11,12 +11,13 @@ class TriviaPlugin < Rubotic::Plugin
       if current_question
         q = current_question[:question]
         a = current_question[:answer]
-        blacklist_index(@current_index)
+        blacklist_id(current_question[:id])
         clear_question
         respond_to(event, "OK, I won't ask #{q} again. The answer was #{a}.")
-      elsif @last_index
-        q = config[:questions][@last_index][:question]
-        blacklist_index(@last_index)
+      elsif @last_id
+        q = get_question(@last_id)[:question]
+        blacklist_id(@last_id)
+        @last_id = nil
         respond_to(event, "OK, I won't ask #{q} again.")
       else
         respond_to(event, "no question to blacklist.")
@@ -51,7 +52,7 @@ class TriviaPlugin < Rubotic::Plugin
 
       if !current_question
         new_question
-        respond_to(event, "#{current_question[:category]}: #{current_question[:question]}", private: false)
+        respond_to(event, "#{current_question[:question]}", private: false)
       else
         respond_to(event, "Can't ask a new question right now. Answer the first one or !giveup", private: false)
       end
@@ -105,9 +106,17 @@ class TriviaPlugin < Rubotic::Plugin
 
   private
 
+  def trivia_db
+    @trivia_db || SQLite3::Database.new(
+      File.join(
+        Rubotic.root, 'config', 'plugins', 'trivia.db'
+      )
+    )
+  end
+
   def right_answer(answer)
     q = current_question
-    q[:answer].downcase == answer || (q[:regexp] && q[:regexp].match(answer))
+    q[:answer].downcase == answer
   end
 
   attr_reader :current_question
@@ -123,15 +132,24 @@ class TriviaPlugin < Rubotic::Plugin
   end
 
   def clear_question
-    @last_index       = @current_index
-    @current_index    = nil
+    @last_id          = @current_id
+    @current_id       = nil
     @current_question = nil
-    @asked_at = nil
+    @asked_at         = nil
   end
 
-  def blacklist_index(index)
-    config[:questions].delete_at(index)
-    save_config
+  def get_question(id)
+    q = trivia_db.execute("SELECT id, question, answer FROM questions WHERE id = ?", id).first
+
+    {
+      id:       q[0],
+      question: q[1],
+      answer:   q[2]
+    }
+  end
+
+  def blacklist_id(id)
+    trivia_db.execute("DELETE FROM questions WHERE id = ?", id)
   end
 
   def timed_out?
@@ -139,13 +157,14 @@ class TriviaPlugin < Rubotic::Plugin
   end
 
   def new_question
-    @current_index    = random_index
-    @current_question = config[:questions][@current_index]
+    q = trivia_db.execute("SELECT id, question, answer FROM questions ORDER BY RANDOM() LIMIT 1").first
+    @current_question = {
+      id:       q[0],
+      question: q[1],
+      answer:   q[2]
+    }
+    @current_id = @current_question[:id]
     @asked_at = Time.now
-  end
-
-  def random_index
-    rand(0..config[:questions].length - 1)
   end
 
   def can_get_new?
@@ -154,7 +173,7 @@ class TriviaPlugin < Rubotic::Plugin
 
   def initialize(bot)
     @current_question = nil
-    @current_index    = nil
+    @current_id       = nil
     @asked_at         = nil
 
     @bot = bot
