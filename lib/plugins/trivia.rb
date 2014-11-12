@@ -54,7 +54,7 @@ class TriviaPlugin < Rubotic::Plugin
         new_question
         respond_to(event, "#{current_question[:question]}", private: false)
       else
-        respond_to(event, "Can't ask a new question right now. Answer the first one or !giveup", private: false)
+        respond_to(event, "Current question (!giveup to skip): #{current_question[:question]}", private: false)
       end
     end
   end
