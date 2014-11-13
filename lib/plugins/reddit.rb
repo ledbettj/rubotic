@@ -28,6 +28,17 @@ class RedditPlugin < Rubotic::Plugin
       end
     end
   end
+  
+  command '!joke' do
+    describe "Tells a joke"
+    run do |event|
+      if (item = @client.browse('jokes', limit:50).sample)
+        respond_to(event, (item.title))
+        respond_to(event, "...")
+        respond_to(event, (item.selftext.gsub /$\n/, ''))
+      end
+    end
+  end
 
   def initialize(bot)
     @bot = bot
