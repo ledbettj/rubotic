@@ -32,8 +32,8 @@ class GitPlugin < Rubotic::Plugin
     bot.quit("Upgrade to #{@commits.first}")
     `git merge origin/master`
     `bundle install`
-    `bundle exec bin/rubotic`
-    exec 'bundle exec bin/rubotic'
+    # systemd will restart us if we exit (hopefully)
+    Kernel.exit(0)
   end
 
   def update_self(event)
