@@ -84,7 +84,7 @@ class Rubotic::Bot::Connection
 
   def write_split(msg)
     text = msg.args.last
-    text.scan(/.{1,510}/) do |part|
+    text.scan(/.{1,490}/) do |part|
       msg.args[-1] = part
       @s.write("#{msg}\n")
     end
